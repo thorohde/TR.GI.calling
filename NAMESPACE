@@ -3,6 +3,4 @@
 export(normalizeReadcounts)
 export(sequencing_coverage_plot)
 import(data.table)
-import(ggplot2)
-importFrom(ggplot,ggsave)
-importFrom(ggplot,last_plot)
+importFrom(ggplot2,aes)

@@ -1,5 +1,5 @@
 #' @import data.table
-#' @import ggplot2
+#' @importFrom ggplot2 aes
 #'
 #' @export sequencing_coverage_plot
 

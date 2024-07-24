@@ -1,5 +1,3 @@
-#' @importFrom ggplot last_plot
-#' @importFrom ggplot ggsave
 #' @export normalizeReadcounts
 
 ## ---- normalizeReadcounts function ----
