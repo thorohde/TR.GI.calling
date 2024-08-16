@@ -11,7 +11,7 @@ library_rc_to_lfc_plot <- \(.library_rc, .lfc, .lfc_extreme = 8, .stepsize = 0.5
   qc$pos[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_max > .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
   qc$neg[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_min < .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
 
-  Reduce(bind_rows, qc)[, count := round(count, 2)]
+  Reduce(dplyr::bind_rows, qc)[, count := round(count, 2)]
 }
 
 
@@ -32,7 +32,7 @@ library_rc_to_lfc_plot <- \(.library_rc, lfc_list, .lfc_extreme = 8, .stepsize =
   qc$pos[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_max > .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
   qc$neg[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_min < .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
 
-  Reduce(bind_rows, qc)[, count := round(count, 2)]
+  Reduce(dplyr::bind_rows, qc)[, count := round(count, 2)]
 }
 
 
