@@ -1,38 +1,34 @@
-library_rc_to_lfc_plot <- \(.library_rc, .lfc, .lfc_extreme = 8, .stepsize = 0.5) {
+#' @import data.table
+#'
+#' @export library_rc_to_lfc_plot
 
-  .th_seq = c(0, seq(20, 400, by = 10))
-  .th_seq_up = c(seq(20, 400, by = 10), 10000)
+lib_rc_to_lfc_plot <- \(lib_readcounts,
+                        lfc_list,
+                        rc_max = 1000,
+                        lfc_min = 5, lfc_max = 10,
+                        rc_binwidth = 50,
+                        lfc_binwidth = 0.5) {
 
-  x <- data.table(lib = .library_rc, lfc_min = apply(.lfc, 1, min, na.rm = T), lfc_max = apply(.lfc, 1, max, na.rm = T))
+  lfc_ths_pos <- base::seq(0, lfc_max, lfc_binwidth)
+  lfc_ths_neg <- base::seq(lfc_min, -lfc_binwidth, lfc_binwidth)
 
-  qc <- list(pos = copy(Reduce(bind_rows, lapply(seq(.stepsize, .lfc_extreme, .stepsize), \(.) data.table(th_seq = .th_seq, th_seq_up = .th_seq_up, th_lfc = .)))),
-             neg = copy(Reduce(bind_rows, lapply(seq(-.lfc_extreme, -.stepsize, .stepsize), \(.) data.table(th_seq = .th_seq, th_seq_up = .th_seq_up, th_lfc = .)))))
+  rc_ths_low <- c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth))
+  rc_ths_high <- c(base::seq(rc_binwidth, rc_max, by = rc_binwidth), 10*rc_max)
 
-  qc$pos[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_max > .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
-  qc$neg[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_min < .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
+  plot_array <- empty_array(base::list(base::as.character(c(lfc_ths_neg, lfc_ths_pos)),
+                                       base::as.character(c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth)))))
 
-  Reduce(dplyr::bind_rows, qc)[, count := round(count, 2)]
+  .d <- data.table(lib_rc = lib_readcounts,
+                   lfc_min = base::do.call(\(...) base::pmin(..., na.rm = T), lfc_list),
+                   lfc_max = base::do.call(\(...) base::pmax(..., na.rm = T), lfc_list))
+
+  for (i in base::seq_along(1:base::length(rc_ths_low))) {
+    .d_in_bin <- .d[!is.na(lib_rc) & lib_rc %between% c(rc_ths_low[i], rc_ths_high[i])]
+    if (.d_in_bin[, .N] == 0) {
+      plot_array[base::as.character(c(lfc_ths_neg, lfc_ths_pos)),i] <- 0
+    } else {
+      plot_array[as.character(lfc_ths_pos),i] <- base::sapply(lfc_ths_pos, \(.) {.d_in_bin[, sum(lfc_max > ., na.rm = T) / .N]})
+      plot_array[as.character(lfc_ths_neg),i] <- base::sapply(lfc_ths_neg, \(.) {.d_in_bin[, sum(lfc_min < ., na.rm = T) / .N]})
+    }}
+  return(plot_array)
 }
-
-
-# if lfc are given as list:
-
-library_rc_to_lfc_plot <- \(.library_rc, lfc_list, .lfc_extreme = 8, .stepsize = 0.5) {
-
-  .th_seq = c(0, seq(20, 400, by = 10))
-  .th_seq_up = c(seq(20, 400, by = 10), 10000)
-
-  x <- data.table(lib = .library_rc,
-                  lfc_min = do.call(\(...) pmin(..., na.rm = TRUE), lfc_list),
-                  lfc_max = do.call(\(...) pmax(..., na.rm = TRUE), lfc_list))
-
-  qc <- list(pos = copy(Reduce(bind_rows, lapply(seq(.stepsize, .lfc_extreme, .stepsize), \(.) data.table(th_seq = .th_seq, th_seq_up = .th_seq_up, th_lfc = .)))),
-             neg = copy(Reduce(bind_rows, lapply(seq(-.lfc_extreme, -.stepsize, .stepsize), \(.) data.table(th_seq = .th_seq, th_seq_up = .th_seq_up, th_lfc = .)))))
-
-  qc$pos[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_max > .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
-  qc$neg[, count := mapply(\(.th1, .th2, .th3) {x[lib > .th1 & lib < .th2 & lfc_min < .th3, .N] / x[lib > .th1 & lib < .th2, .N]}, th_seq, th_seq_up, th_lfc)]
-
-  Reduce(dplyr::bind_rows, qc)[, count := round(count, 2)]
-}
-
-
