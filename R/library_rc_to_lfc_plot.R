@@ -1,10 +1,11 @@
 #' @import data.table
 #' @export library_rc_to_lfc_plot
 
+
 library_rc_to_lfc_plot <- \(lib_readcounts,
                             lfc_list,
                             rc_max = 1000,
-                            lfc_min = 5, lfc_max = 10,
+                            lfc_min = -5, lfc_max = 10,
                             rc_binwidth = 50,
                             lfc_binwidth = 0.5) {
 
@@ -14,12 +15,10 @@ library_rc_to_lfc_plot <- \(lib_readcounts,
   rc_ths_low <- c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth))
   rc_ths_high <- c(base::seq(rc_binwidth, rc_max, by = rc_binwidth), 10*rc_max)
 
-  plot_array <- base::array(data = base::as.character(c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth))),
-                            dim = base::sapply(list(base::as.character(c(lfc_ths_neg, lfc_ths_pos))), base::length),
-                            dimnames = base::list(base::as.character(c(lfc_ths_neg, lfc_ths_pos))))
+  plot_array <- list(base::as.character(c(lfc_ths_neg, lfc_ths_pos)),
+                     base::as.character(c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth))))
 
-  #plot_array <- empty_array(dnames = base::list(base::as.character(c(lfc_ths_neg, lfc_ths_pos)),
-  #                                              values = base::as.character(c(0, base::seq(rc_binwidth, rc_max, by = rc_binwidth)))))
+  plot_array <- base::array(data = NA, dim = base::sapply(plot_array, base::length), dimnames = plot_array)
 
   .d <- data.table(lib_rc = lib_readcounts,
                    lfc_min = base::Reduce(base::pmin, lfc_list),
