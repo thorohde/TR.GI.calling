@@ -4,10 +4,15 @@
 
 library_rc_to_lfc_plot <- \(lib_readcounts,
                             lfc_list,
-                            rc_max = 1000,
-                            lfc_min = -5, lfc_max = 10,
+                            rc_max,
+                            lfc_min,
+                            lfc_max,
                             rc_binwidth = 50,
                             lfc_binwidth = 0.5) {
+
+  if (missing(rc_max)) {rc_max <- max(lib_readcounts, na.rm = T)}
+  if (missing(lfc_max)) {lfc_max <- base::max(base::sapply(lfc_list, base::max, na.rm = T))}
+  if (missing(lfc_min)) {lfc_min <- base::min(base::sapply(lfc_list, base::min, na.rm = T))}
 
   lfc_ths_pos <- base::seq(0, lfc_max, lfc_binwidth)
   lfc_ths_neg <- base::seq(lfc_min, -lfc_binwidth, lfc_binwidth)
