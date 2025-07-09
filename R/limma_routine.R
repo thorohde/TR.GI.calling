@@ -2,8 +2,13 @@
 #' @importFrom stats p.adjust
 #' @export limma_routine
 
-limma_routine <- \(GI_array, .block, only_dup_cor = F, FDR_method = "BH") {
-  corfit <- limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation
+limma_routine <- \(GI_array, .block, only_dup_cor = F, FDR_method = "BH", suppresswarnings = T) {
+
+  if (suppresswarnings) {
+    corfit <- suppressWarnings(limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation)
+    } else {
+      corfit <- limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation
+      }
 
   if (only_dup_cor) {return(corfit)}
   if (!only_dup_cor) {
