@@ -1,14 +1,12 @@
-#' @importFrom limma duplicateCorrelation lmFit eBayes
-#' @importFrom stats p.adjust
 #' @export limma_routine
 
-limma_routine <- \(GI_array, .block, only_dup_cor = F, FDR_method = "BH", suppresswarnings = T) {
+limma_routine <- function(GI_array, .block, only_dup_cor = F, FDR_method = "BH", suppresswarnings = T) {
 
   if (suppresswarnings) {
     corfit <- suppressWarnings(limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation)
-    } else {
-      corfit <- limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation
-      }
+  } else {
+    corfit <- limma::duplicateCorrelation(GI_array, block = .block)$consensus.correlation
+  }
 
   if (only_dup_cor) {return(corfit)}
   if (!only_dup_cor) {
